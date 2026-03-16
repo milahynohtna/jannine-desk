@@ -10,5 +10,3 @@ void setup() {
 void loop() {
     app.loop();
 }
-
-// ini setelah aku edit
