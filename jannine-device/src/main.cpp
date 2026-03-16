@@ -10,6 +10,3 @@ void setup() {
 void loop() {
     app.loop();
 }
-
-
-// ini file yang sudah ditambahkan comment saat ini.
