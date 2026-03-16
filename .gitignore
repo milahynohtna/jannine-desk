@@ -1,0 +1,18 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# PlatformIO
+.pio/
+.pioenvs/
+.piolibdeps/
+
+# macOS
+.DS_Store
+
+# vscode
+.vscode/
+
+# logs
+*.log

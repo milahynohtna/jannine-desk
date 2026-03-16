@@ -1,0 +1,162 @@
+#include <Arduino.h>
+#include "config/WebSocketConfig.h"
+#include "communication/WiFiManager.h"
+#include "communication/WebSocketClient.h"
+#include "communication/NetworkSetup.h"
+#include "serial_debugging/SerialInputHandler.h"
+
+// Component instances
+WiFiManager wifiManager;
+WebSocketClient wsClient;
+NetworkSetup networkSetup(wifiManager, wsClient);
+SerialInputHandler serialHandler;
+
+// State tracking
+bool receivingResponse = false;
+
+void handleSerialInput(const String& input) {
+    Serial.println(); // New line after input
+    wsClient.sendPrompt(input);
+}
+
+void setup() {
+    // Initialize Serial
+    Serial.begin(SERIAL_BAUD_RATE);
+    delay(2000);
+    Serial.println(ESP.getFlashChipSize());
+
+    Serial.println("\n=== Jannine Device Started ===");
+
+    // Setup WebSocket callbacks
+    networkSetup.setTokenCallback([](const String& token) {
+        Serial.print(token);
+        receivingResponse = true;
+    });
+
+    networkSetup.setDoneCallback([]() {
+        Serial.println("\n[Done]");
+        Serial.print("You: ");
+        receivingResponse = false;
+    });
+
+    networkSetup.setConnectionCallback([](bool connected) {
+        if (connected) {
+            Serial.print("You: ");
+        }
+    });
+
+    // Setup network (WiFi + WebSocket)
+    if (!networkSetup.setupWiFi(WIFI_SSID, WIFI_PASSWORD)) {
+        Serial.println("WiFi setup failed. Restarting...");
+        delay(3000);
+        ESP.restart();
+    }
+
+    if (!networkSetup.setupWebSocket(WS_SERVER_URL)) {
+        Serial.println("WebSocket setup failed. Continuing anyway...");
+    }
+
+    // Setup serial input handler
+    serialHandler.setInputCallback(handleSerialInput);
+
+    Serial.println("=== Ready to chat ===");
+    Serial.print("You: ");
+}
+
+void loop() {
+    // Poll WebSocket for messages
+    wsClient.poll();
+
+    // Check for reconnection
+    networkSetup.checkAndReconnect(RECONNECT_DELAY_MS);
+
+    // Handle serial input
+    serialHandler.checkInput();
+}
+
+
+
+#include <Arduino.h>
+
+#include "components/Display.h"
+#include "drivers/LovyanDriver.h"
+
+#include "animations/IdleAnimation.h"
+#include "animations/ListeningAnimation.h"
+#include "animations/TalkingAnimation.h"
+
+// =====================================
+// CONFIG
+// =====================================
+static constexpr unsigned long ANIMATION_INTERVAL = 10000; // 10 detik
+
+// =====================================
+// DRIVER + DISPLAY (Dependency Injection)
+// =====================================
+LovyanDriver driver;
+Display display(&driver);
+
+// =====================================
+// ANIMATIONS
+// =====================================
+IdleAnimation idleAnim;
+ListeningAnimation listeningAnim;
+TalkingAnimation talkingAnim;
+
+Animation* animations[] = {
+    &idleAnim,
+    &listeningAnim,
+    &talkingAnim
+};
+
+constexpr int animationCount = sizeof(animations) / sizeof(animations[0]);
+
+// =====================================
+// STATE
+// =====================================
+Animation* currentAnimation = nullptr;
+unsigned long lastSwitchTime = 0;
+int currentIndex = 0;
+
+// =====================================
+// SETUP
+// =====================================
+void setup() {
+    Serial.begin(115200);
+
+
+    display.begin();
+
+    currentIndex = 0;
+    currentAnimation = animations[currentIndex];
+    lastSwitchTime = millis();
+}
+
+// =====================================
+// LOOP
+// =====================================
+void loop() {
+
+    unsigned long now = millis();
+
+    // Ganti animasi tiap 10 detik (non-blocking)
+    if (now - lastSwitchTime >= ANIMATION_INTERVAL) {
+
+        currentIndex++;
+        if (currentIndex >= animationCount) {
+            currentIndex = 0;
+        }
+
+        currentAnimation = animations[currentIndex];
+        lastSwitchTime = now;
+
+        Serial.print("Switched to animation index: ");
+        Serial.println(currentIndex);
+    }
+
+    // Render animasi aktif
+    if (currentAnimation != nullptr) {
+        currentAnimation->tick();
+        display.showAnimation(*currentAnimation);
+    }
+}

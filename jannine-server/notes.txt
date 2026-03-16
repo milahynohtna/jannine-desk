@@ -1,0 +1,1 @@
+# tree -I "venv|__pycache__|.git" || show project structure
