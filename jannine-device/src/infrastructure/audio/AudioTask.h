@@ -4,6 +4,7 @@
 
 #include "AudioRingBuffer.h"
 #include "../drivers/I2SDriver.h"
+#include "config/AudioConfig.h"
 
 class AudioTask {
 public:
@@ -15,7 +16,7 @@ public:
     void begin(AudioRingBuffer* buffer)
     {
         _buffer = buffer;
-        _i2s.begin();
+        _i2s.begin(AudioConfig::PINS, AudioConfig::SETTINGS);
 
         xTaskCreatePinnedToCore(
             _taskEntry,

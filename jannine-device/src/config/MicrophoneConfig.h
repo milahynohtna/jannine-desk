@@ -1,23 +1,21 @@
 #pragma once
 
 #include "driver/i2s.h"
-#include "cstdint"
+#include <cstdint>
 
 // ──────────────────────────────────────────────────────
-// AudioPins — tanggung jawab tunggal:
-//   menyimpan konfigurasi pin hardware I2S
+// MicPins — khusus untuk input (INMP441)
 // ──────────────────────────────────────────────────────
-struct AudioPins {
+struct MicrophonePins {
     int16_t bclk;
     int16_t lrc;
-    int16_t dout;
+    int16_t din;   // data dari mic ke ESP32
 };
 
 // ──────────────────────────────────────────────────────
-// AudioSettings — tanggung jawab tunggal:
-//   menyimpan konfigurasi parameter audio I2S
+// MicSettings — konfigurasi audio untuk mic
 // ──────────────────────────────────────────────────────
-struct AudioSettings {
+struct MicrophoneSettings {
     uint32_t              sample_rate;
     i2s_bits_per_sample_t bits_per_sample;
     i2s_channel_fmt_t     channel_format;
@@ -28,24 +26,23 @@ struct AudioSettings {
 };
 
 // ──────────────────────────────────────────────────────
-// AudioConfig — tanggung jawab tunggal:
-//   menyediakan nilai default hardware untuk project ini
+// MicConfig — default untuk INMP441
 // ──────────────────────────────────────────────────────
-namespace AudioConfig {
+namespace MicrophoneConfig {
 
-    constexpr AudioPins PINS = {
+    constexpr MicrophonePins PINS = {
         .bclk = 14,
         .lrc  = 18,
-        .dout = 40
+        .din  = 10   // contoh pin data mic
     };
 
-    constexpr AudioSettings SETTINGS = {
-        .sample_rate     = 20000,
-        .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,
+    constexpr MicrophoneSettings SETTINGS = {
+        .sample_rate     = 16000, // mic lebih umum 16k
+        .bits_per_sample = I2S_BITS_PER_SAMPLE_32BIT, // INMP441 native 24bit (dibaca 32bit)
         .channel_format  = I2S_CHANNEL_FMT_ONLY_LEFT,
         .dma_buf_count   = 8,
-        .dma_buf_len     = 512,
-        .use_apll        = true,
+        .dma_buf_len     = 256,
+        .use_apll        = false,
         .buffer_size     = 4096
     };
 
