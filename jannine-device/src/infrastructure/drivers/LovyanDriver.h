@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../../../include/display/DisplayDriver.h"
+#include "../../../include/display/IDisplayDriver.h"
 #include "config/DisplayConfig.h"
 #include "images/ImageDescriptor.h"
 #include <LovyanGFX.hpp>
 
-class LovyanDriver : public DisplayDriver {
+class LovyanDriver : public IDisplayDriver {
 private:
     class LGFX : public lgfx::LGFX_Device {
         lgfx::Panel_GC9A01 _panel;

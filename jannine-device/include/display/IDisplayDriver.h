@@ -4,9 +4,9 @@
 #include "images/ImageDescriptor.h"
 #include "animation/Animation.h"
 
-class DisplayDriver {
+class IDisplayDriver {
 public:
-    virtual ~DisplayDriver() = default;
+    virtual ~IDisplayDriver() = default;
 
     virtual bool init() = 0;
     virtual void setRotation(int rotation) = 0;

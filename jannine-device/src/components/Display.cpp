@@ -1,7 +1,7 @@
 #include "Display.h"
 
 
-Display::Display(DisplayDriver* driver)
+Display::Display(IDisplayDriver* driver)
     : _driver(driver) {}
 
 void Display::begin() const {

@@ -1,5 +1,5 @@
 #pragma once
-#include "../../include/display/DisplayDriver.h"
+#include "../../include/display/IDisplayDriver.h"
 #include "images/ImageDescriptor.h"
 #include "animation/Animation.h"
 
@@ -7,10 +7,10 @@
 
 class Display {
 private:
-    DisplayDriver* _driver;
+    IDisplayDriver* _driver;
 
 public:
-    explicit Display(DisplayDriver* driver);
+    explicit Display(IDisplayDriver* driver);
 
     void begin() const;
     void clear(uint16_t color) const;
