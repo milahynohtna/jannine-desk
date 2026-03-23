@@ -9,7 +9,6 @@
 #include "infrastructure/network/NetworkSetup.h"
 #include "infrastructure/network/WebSocketClient.h"
 
-#include "infrastructure/serial_debugging/SerialInputHandler.h"
 #include "config/WebSocketConfig.h"
 
 class SystemSetup {
@@ -20,8 +19,7 @@ public:
         RobotRuntime& runtime,
         ConversationEngine& conversation,
         WebSocketClient& wsClient,
-        NetworkSetup& network,
-        SerialInputHandler& serial
+        NetworkSetup& network
     );
 
     void run();
@@ -35,9 +33,9 @@ private:
     WebSocketClient& _wsClient;
     NetworkSetup& _network;
 
-    SerialInputHandler& _serial;
 
-    void _setupSerial();
+
+
     void _setupWebSocketCallbacks();
     void _setupNetwork();
 };

@@ -22,8 +22,12 @@ public:
     bool isConnected() const;
     void poll();
 
-    void sendPrompt(const String& text);
+    // ───────────── SEND ─────────────
+    void sendPrompt(const String& text);                 // JSON wrapped
+    void sendText(const String& text);                   // 🔥 RAW TEXT (control)
+    void sendBytes(const uint8_t* data, size_t len);     // binary audio
 
+    // ───────────── CALLBACK ─────────────
     void setTokenCallback(TokenCallback callback);
     void setDoneCallback(DoneCallback callback);
     void setConnectionCallback(ConnectionCallback callback);

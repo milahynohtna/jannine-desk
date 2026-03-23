@@ -3,6 +3,7 @@
 #include "../components/Display.h"
 #include "../components/Audio.h"
 #include "../core/AppState.h"
+#include "infrastructure/drivers/I2SDriver.h"   // 🔥 tambahkan ini
 
 #include "../animations/IdleAnimation.h"
 #include "../animations/ListeningAnimation.h"
@@ -11,7 +12,7 @@
 class RobotRuntime {
 public:
 
-    RobotRuntime(Display& display);
+    RobotRuntime(Display& display, I2SDriver& driver); // 🔥 tambah driver
 
     void begin();
     void update();
@@ -19,12 +20,13 @@ public:
     Audio& audio();
 
     void setListening();
+    void setSpeaking();
     void setIdle();
 
 private:
 
     Display& _display;
-    Audio _audio;
+    Audio _audio;   // sekarang valid karena di-init di ctor
 
     AppState _state;
 

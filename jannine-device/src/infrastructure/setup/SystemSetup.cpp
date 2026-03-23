@@ -5,15 +5,12 @@ SystemSetup::SystemSetup(
     RobotRuntime& runtime,
     ConversationEngine& conversation,
     WebSocketClient& wsClient,
-    NetworkSetup& network,
-    SerialInputHandler& serial
-)
+    NetworkSetup& network)
 : _display(display)
 , _runtime(runtime)
 , _conversation(conversation)
 , _wsClient(wsClient)
 , _network(network)
-, _serial(serial)
 {}
 
 void SystemSetup::run()
@@ -21,29 +18,22 @@ void SystemSetup::run()
     Serial.begin(SERIAL_BAUD_RATE);
     delay(2000);
 
+    Serial.printf("[MEM] Free heap     : %d bytes\n", ESP.getFreeHeap());
+    Serial.printf("[MEM] Free PSRAM    : %d bytes\n", ESP.getFreePsram());
+    Serial.printf("[MEM] Total PSRAM   : %d bytes\n", ESP.getPsramSize());
+
     Serial.println("\n=== Jannine Device Started ===");
 
     _display.begin();
     _runtime.begin();
 
-    _setupSerial();
     _setupWebSocketCallbacks();
     _setupNetwork();
 
-    _conversation.sendPrompt("hello");
+    // 🔥 MULAI DARI LISTENING (INI KUNCI)
+    _conversation.startListening();
 
-    Serial.println("=== Ready ===");
-    Serial.print("You: ");
-}
-
-void SystemSetup::_setupSerial()
-{
-    _serial.setInputCallback(
-        [this](const String& input)
-        {
-            _conversation.sendPrompt(input);
-        }
-    );
+    Serial.println("=== Voice Mode Ready ===");
 }
 
 void SystemSetup::_setupWebSocketCallbacks()
@@ -51,6 +41,9 @@ void SystemSetup::_setupWebSocketCallbacks()
     _wsClient.setDataCallback(
         [this](const uint8_t* data, size_t length)
         {
+            // startSpeaking() sudah punya _speakingTriggered sebagai guard
+            // tidak perlu cek isPlaying() di sini
+            _conversation.startSpeaking();
             _runtime.audio().write(data, length);
         }
     );
@@ -76,7 +69,6 @@ void SystemSetup::_setupWebSocketCallbacks()
             {
                 Serial.println("WebSocket Connected.");
                 _runtime.setIdle();
-                Serial.print("You: ");
             }
             else
             {
@@ -85,7 +77,6 @@ void SystemSetup::_setupWebSocketCallbacks()
         }
     );
 }
-
 void SystemSetup::_setupNetwork()
 {
     if (!_network.setupWiFi(WIFI_SSID, WIFI_PASSWORD))

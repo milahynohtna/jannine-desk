@@ -68,6 +68,31 @@ void WebSocketClient::sendPrompt(const String& text) {
     client.send(output);
 }
 
+void WebSocketClient::sendBytes(const uint8_t* data, size_t len)
+{
+    if (!connected) {
+        Serial.println("Error: WebSocket not connected");
+        return;
+    }
+
+    if (data == nullptr || len == 0) {
+        return;
+    }
+
+    // Kirim sebagai binary frame
+    client.sendBinary((const char*)data, len);
+}
+
+void WebSocketClient::sendText(const String& text)
+{
+    if (!connected) {
+        Serial.println("Error: WebSocket not connected");
+        return;
+    }
+
+    client.send(text);
+}
+
 void WebSocketClient::setTokenCallback(TokenCallback callback) {
     onToken = callback;
 }

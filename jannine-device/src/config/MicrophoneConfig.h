@@ -33,12 +33,12 @@ namespace MicrophoneConfig {
     constexpr MicrophonePins PINS = {
         .bclk = 14,
         .lrc  = 18,
-        .din  = 10   // contoh pin data mic
+        .din  = 10   //
     };
 
     constexpr MicrophoneSettings SETTINGS = {
-        .sample_rate     = 16000, // mic lebih umum 16k
-        .bits_per_sample = I2S_BITS_PER_SAMPLE_32BIT, // INMP441 native 24bit (dibaca 32bit)
+        .sample_rate     = 16000,
+        .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,  // 🔥 ganti dari 32BIT
         .channel_format  = I2S_CHANNEL_FMT_ONLY_LEFT,
         .dma_buf_count   = 8,
         .dma_buf_len     = 256,

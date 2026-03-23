@@ -16,6 +16,10 @@
 #include "../infrastructure/serial_debugging/SerialInputHandler.h"
 #include "../infrastructure/setup/SystemSetup.h"
 
+// 🔊 audio
+#include "../infrastructure/drivers/I2SDriver.h"
+#include "components//Microphone.h"
+
 class App {
 public:
 
@@ -26,17 +30,26 @@ public:
 
 private:
 
+    // UI
     LovyanDriver _driver;
     Display _display;
 
+    // Network
     WiFiManager _wifiManager;
     WebSocketClient _wsClient;
     NetworkSetup _networkSetup;
 
+    // Audio
+    I2SDriver _i2s;
+    Microphone _microphone;
+
+    // IO
     SerialInputHandler _serial;
 
+    // Core
     RobotRuntime _runtime;
     ConversationEngine _conversation;
 
+    // Setup orchestrator
     SystemSetup _setup;
 };

@@ -1,6 +1,5 @@
 #include "I2SDriver.h"
 
-// optional include (kalau kamu pakai langsung struct-nya)
 #include "config/AudioConfig.h"
 #include "config/MicrophoneConfig.h"
 
@@ -10,6 +9,20 @@
 I2SDriver::I2SDriver(i2s_port_t port)
     : _port(port)
 {
+}
+
+// ──────────────────────────────────────────────────────
+// INTERNAL: install driver safely
+// ──────────────────────────────────────────────────────
+void I2SDriver::_installDriver(const i2s_config_t& config)
+{
+    // 🔥 penting: uninstall dulu kalau sudah pernah dipakai
+    if (_mode != I2SMode::NONE) {
+        i2s_driver_uninstall(_port);
+        _mode = I2SMode::NONE;
+    }
+
+    i2s_driver_install(_port, &config, 0, nullptr);
 }
 
 // ──────────────────────────────────────────────────────
@@ -34,6 +47,8 @@ void I2SDriver::begin(
         .fixed_mclk           = 0
     };
 
+    _installDriver(config);
+
     i2s_pin_config_t pin_config = {
         .bck_io_num   = pins.bclk,
         .ws_io_num    = pins.lrc,
@@ -41,9 +56,10 @@ void I2SDriver::begin(
         .data_in_num  = I2S_PIN_NO_CHANGE
     };
 
-    i2s_driver_install(_port, &config, 0, nullptr);
     i2s_set_pin(_port, &pin_config);
     i2s_zero_dma_buffer(_port);
+
+    _mode = I2SMode::TX;
 }
 
 // ──────────────────────────────────────────────────────
@@ -51,12 +67,14 @@ void I2SDriver::begin(
 // ──────────────────────────────────────────────────────
 void I2SDriver::write(const uint8_t* data, size_t len)
 {
+    if (_mode != I2SMode::TX) return;
+
     size_t written = 0;
     i2s_write(_port, data, len, &written, portMAX_DELAY);
 }
 
 // ──────────────────────────────────────────────────────
-// RX MODE (Microphone / INMP441)
+// RX MODE (Microphone)
 // ──────────────────────────────────────────────────────
 void I2SDriver::beginMic(
     const MicrophonePins& pins,
@@ -77,6 +95,8 @@ void I2SDriver::beginMic(
         .fixed_mclk           = 0
     };
 
+    _installDriver(config);
+
     i2s_pin_config_t pin_config = {
         .bck_io_num   = pins.bclk,
         .ws_io_num    = pins.lrc,
@@ -84,9 +104,10 @@ void I2SDriver::beginMic(
         .data_in_num  = pins.din
     };
 
-    i2s_driver_install(_port, &config, 0, nullptr);
     i2s_set_pin(_port, &pin_config);
     i2s_zero_dma_buffer(_port);
+
+    _mode = I2SMode::RX;
 }
 
 // ──────────────────────────────────────────────────────
@@ -94,6 +115,8 @@ void I2SDriver::beginMic(
 // ──────────────────────────────────────────────────────
 size_t I2SDriver::read(uint8_t* buffer, size_t len)
 {
+    if (_mode != I2SMode::RX) return 0;
+
     size_t bytes_read = 0;
     i2s_read(_port, buffer, len, &bytes_read, portMAX_DELAY);
     return bytes_read;
@@ -104,6 +127,18 @@ size_t I2SDriver::read(uint8_t* buffer, size_t len)
 // ──────────────────────────────────────────────────────
 void I2SDriver::stop()
 {
+    if (_mode == I2SMode::NONE) return;
+
     i2s_zero_dma_buffer(_port);
     i2s_driver_uninstall(_port);
+
+    _mode = I2SMode::NONE;
+}
+
+// ──────────────────────────────────────────────────────
+// GET MODE
+// ──────────────────────────────────────────────────────
+I2SMode I2SDriver::mode() const
+{
+    return _mode;
 }
