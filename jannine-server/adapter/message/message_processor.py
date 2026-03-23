@@ -1,21 +1,28 @@
-from typing import Optional
+from typing import Optional, Union
 
-from domain.models.message import Message, PromptMessage
+from domain.models.message import PromptMessage
 from application.use_cases.process_input_string import process_input_string
+from application.use_cases.process_input_audio import process_input_audio
 
 
 class MessageProcessor:
-    """Processes incoming messages"""
 
     @staticmethod
-    def process(raw_message: str) -> Optional[PromptMessage]:
-        """
-        Process raw message string into PromptMessage.
-        Returns None if not a valid prompt.
-        """
-        msg: Optional[Message] = process_input_string(raw_message)
+    def process(raw_message: Union[str, bytes]) -> Optional[PromptMessage]:
 
-        if isinstance(msg, PromptMessage):
-            return msg
+        # 🔊 AUDIO (bytes)
+        if isinstance(raw_message, (bytes, bytearray)):
+            return process_input_audio(raw_message)
+
+        # 🔤 TEXT (JSON / audio_end / prompt)
+        elif isinstance(raw_message, str):
+
+            # 🔥 coba audio handler dulu
+            audio_msg = process_input_audio(raw_message)
+            if audio_msg:
+                return audio_msg
+
+            # 🔤 fallback ke prompt biasa
+            return process_input_string(raw_message)
 
         return None

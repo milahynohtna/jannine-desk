@@ -19,3 +19,7 @@ class DoneMessage(Message):
 class StringMessage(Message):
     type: str
     data: str
+
+class AudioMessage:
+    def __init__(self, data: bytes):
+        self.data = data
