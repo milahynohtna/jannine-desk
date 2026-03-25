@@ -14,33 +14,33 @@ bool WiFiManager::connect(const char* ssid, const char* password) {
     WiFi.begin(ssid, password);
 
     int attempts = 0;
-    const int maxAttempts = 30; // 15 seconds timeout
 
-    while (WiFi.status() != WL_CONNECTED && attempts < maxAttempts) {
+    while (WiFiClass::status() != WL_CONNECTED && attempts < MAX_ATTEMPTS) {
         delay(500);
         Serial.print(".");
         attempts++;
     }
 
-    if (WiFi.status() == WL_CONNECTED) {
+    if (WiFiClass::status() == WL_CONNECTED) {
         Serial.println("\nWiFi Connected!");
         printStatus();
         return true;
-    } else {
-        Serial.println("\nWiFi Connection Failed!");
-        return false;
     }
+
+    Serial.println("\nWiFi connection FAILED!");
+    return false;
 }
 
-bool WiFiManager::isConnected() const {
-    return WiFi.status() == WL_CONNECTED;
+// NOLINTNEXTLINE(readability-static-accessed-through-instance)
+bool WiFiManager::isConnected() {
+    return WiFiClass::status() == WL_CONNECTED;
 }
 
-String WiFiManager::getLocalIP() const {
+String WiFiManager::getLocalIP(){
     return WiFi.localIP().toString();
 }
 
-void WiFiManager::printStatus() const {
+void WiFiManager::printStatus() {
     Serial.println("WiFi Status:");
     Serial.print("  SSID: ");
     Serial.println(WiFi.SSID());

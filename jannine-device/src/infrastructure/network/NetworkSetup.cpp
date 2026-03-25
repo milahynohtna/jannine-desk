@@ -1,11 +1,12 @@
 #include "NetworkSetup.h"
 #include "config/WebSocketConfig.h"
 
-NetworkSetup::NetworkSetup(WiFiManager& wifi, WebSocketClient& ws) 
-    : wifiManager(wifi), wsClient(ws), onToken(nullptr), onDone(nullptr), onConnection(nullptr) {
+NetworkSetup::NetworkSetup(WiFiManager& wifi, WebSocketClient& ws)
+    : wifiManager(wifi), wsClient(ws),
+      onToken(nullptr), onDone(nullptr), onConnection(nullptr) {
 }
 
-bool NetworkSetup::setupWiFi(const char* ssid, const char* password) {
+bool NetworkSetup::setupWiFi(const char* ssid, const char* password) const {
     Serial.print("Connecting to WiFi: ");
     Serial.println(ssid);
     
@@ -18,7 +19,7 @@ bool NetworkSetup::setupWiFi(const char* ssid, const char* password) {
     return true;
 }
 
-bool NetworkSetup::setupWebSocket(const char* serverUrl) {
+bool NetworkSetup::setupWebSocket(const char* serverUrl) const {
     Serial.println("Connecting to WebSocket server...");
     
     if (onToken)      wsClient.setTokenCallback(onToken);
@@ -34,19 +35,9 @@ bool NetworkSetup::setupWebSocket(const char* serverUrl) {
     return true;
 }
 
-void NetworkSetup::setTokenCallback(TokenCallback callback) {
-    onToken = callback;
-}
 
-void NetworkSetup::setDoneCallback(DoneCallback callback) {
-    onDone = callback;
-}
 
-void NetworkSetup::setConnectionCallback(ConnectionCallback callback) {
-    onConnection = callback;
-}
-
-void NetworkSetup::checkAndReconnect(uint32_t reconnectDelayMs) {
+void NetworkSetup::checkAndReconnect(uint32_t reconnectDelayMs) const {
     if (wsClient.isConnected()) return;
 
     Serial.println("WebSocket disconnected. Reconnecting...");
@@ -72,4 +63,16 @@ void NetworkSetup::checkAndReconnect(uint32_t reconnectDelayMs) {
     } else {
         Serial.println("Reconnected successfully!");
     }
+}
+
+void NetworkSetup::setTokenCallback(const TokenCallback& callback) {
+    onToken = callback;
+}
+
+void NetworkSetup::setDoneCallback(const DoneCallback& callback) {
+    onDone = callback;
+}
+
+void NetworkSetup::setConnectionCallback(const ConnectionCallback& callback) {
+    onConnection = callback;
 }

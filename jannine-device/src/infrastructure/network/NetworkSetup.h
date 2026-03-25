@@ -7,23 +7,24 @@
 
 class NetworkSetup {
 public:
+
     NetworkSetup(WiFiManager& wifi, WebSocketClient& ws);
     
     // Setup methods
-    bool setupWiFi(const char* ssid, const char* password);
-    bool setupWebSocket(const char* serverUrl);
+    bool setupWiFi(const char* ssid, const char* password) const;
+    bool setupWebSocket(const char* serverUrl) const;
     
     // Callback setters for WebSocket events
     typedef std::function<void(const String&)> TokenCallback;
     typedef std::function<void()> DoneCallback;
     typedef std::function<void(bool)> ConnectionCallback;
     
-    void setTokenCallback(TokenCallback callback);
-    void setDoneCallback(DoneCallback callback);
-    void setConnectionCallback(ConnectionCallback callback);
+    void setTokenCallback(const TokenCallback& callback);
+    void setDoneCallback(const DoneCallback& callback);
+    void setConnectionCallback(const ConnectionCallback& callback);
     
     // Reconnection handling
-    void checkAndReconnect(uint32_t reconnectDelayMs = 2000);
+    void checkAndReconnect(uint32_t reconnectDelayMs = 2000) const;
     
 private:
     WiFiManager& wifiManager;

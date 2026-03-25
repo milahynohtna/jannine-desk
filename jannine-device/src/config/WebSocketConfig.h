@@ -14,5 +14,6 @@
 // Connection Settings
 #define RECONNECT_DELAY_MS 2000
 #define SERIAL_BAUD_RATE 115200
+#define MAX_ATTEMPTS 30
 
 #endif // WEBSOCKET_CONFIG_H

@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <WiFi.h>
+#include <config/WebSocketConfig.h>
 
 class WiFiManager {
 public:
@@ -10,15 +11,17 @@ public:
     
     // Connection management
     bool connect(const char* ssid, const char* password);
-    bool isConnected() const;
-    String getLocalIP() const;
+    static bool isConnected();
+    // NOLINTNEXTLINE(readability-static-accessed-through-instance)
+    static String getLocalIP();
     
     // Status
-    void printStatus() const;
+    static void printStatus();
 
 private:
     const char* currentSSID;
     const char* currentPassword;
+
 };
 
 #endif // WIFI_MANAGER_H
