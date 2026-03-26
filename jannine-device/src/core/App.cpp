@@ -22,14 +22,11 @@ App::App()
 )
 {}
 
-void App::setup()
-{
+void App::setup() {
     _setup.run();
-
 }
 
-void App::loop()
-{
+void App::loop() {
     _wsClient.poll();
     _networkSetup.checkAndReconnect(RECONNECT_DELAY_MS);
 

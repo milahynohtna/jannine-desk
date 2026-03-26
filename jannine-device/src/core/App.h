@@ -13,7 +13,6 @@
 #include "../runtime/RobotRuntime.h"
 #include "../conversation/ConversationEngine.h"
 
-#include "../infrastructure/serial_debugging/SerialInputHandler.h"
 #include "../infrastructure/setup/SystemSetup.h"
 
 // 🔊 audio
@@ -43,8 +42,6 @@ private:
     I2SDriver _i2s;
     Microphone _microphone;
 
-    // IO
-    SerialInputHandler _serial;
 
     // Core
     RobotRuntime _runtime;

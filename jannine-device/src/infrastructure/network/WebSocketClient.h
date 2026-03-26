@@ -23,7 +23,6 @@ public:
     void poll();
 
     // ───────────── SEND ─────────────
-    void sendPrompt(const String& text);                 // JSON wrapped
     void sendText(const String& text);                   // 🔥 RAW TEXT (control)
     void sendBytes(const uint8_t* data, size_t len);     // binary audio
 
@@ -42,8 +41,8 @@ private:
     ConnectionCallback onConnectionChange;
     DataCallback onData;
 
-    void onMessageCallback(WebsocketsMessage message);
-    void onEventsCallback(WebsocketsEvent event, String data);
+    void onMessageCallback(const WebsocketsMessage& message);
+    void onEventsCallback(WebsocketsEvent event, const String& data);
     void handleJsonMessage(const String& payload);
 };
 

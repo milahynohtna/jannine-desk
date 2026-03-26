@@ -1,6 +1,8 @@
 #include "WebSocketClient.h"
 #include <ArduinoJson.h>
 
+#include <utility>
+
 WebSocketClient::WebSocketClient()
     : connected(false),
       onToken(nullptr),
@@ -19,11 +21,11 @@ bool WebSocketClient::connect(const char* serverUrl) {
 
     // Re-register callbacks setiap kali connect dipanggil
     // (penting saat reconnect — object internal bisa reset)
-    client.onMessage([this](WebsocketsMessage message) {
+    client.onMessage([this](const WebsocketsMessage& message) {
         this->onMessageCallback(message);
     });
 
-    client.onEvent([this](WebsocketsEvent event, String data) {
+    client.onEvent([this](WebsocketsEvent event, const String& data) {
         this->onEventsCallback(event, data);
     });
 
@@ -52,21 +54,6 @@ void WebSocketClient::poll() {
     client.poll();
 }
 
-void WebSocketClient::sendPrompt(const String& text) {
-    if (!connected) {
-        Serial.println("Error: WebSocket not connected");
-        return;
-    }
-
-    JsonDocument doc;
-    doc["type"] = "prompt";
-    doc["data"] = text;
-
-    String output;
-    serializeJson(doc, output);
-
-    client.send(output);
-}
 
 void WebSocketClient::sendBytes(const uint8_t* data, size_t len)
 {
@@ -94,26 +81,26 @@ void WebSocketClient::sendText(const String& text)
 }
 
 void WebSocketClient::setTokenCallback(TokenCallback callback) {
-    onToken = callback;
+    onToken = std::move(callback);
 }
 
 void WebSocketClient::setDoneCallback(DoneCallback callback) {
-    onDone = callback;
+    onDone = std::move(callback);
 }
 
 void WebSocketClient::setConnectionCallback(ConnectionCallback callback) {
-    onConnectionChange = callback;
+    onConnectionChange = std::move(callback);
 }
 
 void WebSocketClient::setDataCallback(DataCallback callback) {
-    onData = callback;
+    onData = std::move(callback);
 }
 
-void WebSocketClient::onMessageCallback(WebsocketsMessage message)
+void WebSocketClient::onMessageCallback(const WebsocketsMessage& message)
 {
     if (message.isBinary()) {
         if (onData) {
-            const uint8_t* data =
+            const auto* data =
                 reinterpret_cast<const uint8_t*>(message.c_str());
             size_t len = message.length();
             if (len > 0) {
@@ -127,7 +114,7 @@ void WebSocketClient::onMessageCallback(WebsocketsMessage message)
     handleJsonMessage(payload);
 }
 
-void WebSocketClient::onEventsCallback(WebsocketsEvent event, String data)
+void WebSocketClient::onEventsCallback(WebsocketsEvent event, const String& data)
 {
     if (event == WebsocketsEvent::ConnectionOpened) {
         connected = true;
